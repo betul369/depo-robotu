@@ -1,5 +1,6 @@
 #Depo Robotu Simulatoru - kurallar ve dosya islemleri.
 import json
+import csv
 YONLER = ["K", "D", "G", "B"]
 ADIM = {"K": (0, -1), "D": (1, 0), "G": (0, 1), "B": (-1, 0)}
 
@@ -176,7 +177,29 @@ def komut_uygula(durum, komut):
     return "GECERSIZ"
 
 
+def komut_metni(komut):
+    ad, n = komut
+    if n is None:
+        return ad
+    return ad + " " + str(n)
 
+
+def log_satiri(no, komut, durum, olay):
+    return {"adim": no, "komut": komut_metni(komut), "x": durum["x"],
+            "y": durum["y"], "yon": durum["yon"],
+            "batarya": durum["batarya"], "olay": olay}
+
+
+def sonuc_olustur(durum):
+    ziyaret = durum["ziyaret"]
+    en_cok = max(ziyaret.values())
+    adaylar = [k for k, v in ziyaret.items() if v == en_cok]
+    x, y = min(adaylar, key=lambda k: (k[1], k[0]))
+    return {"konum": [durum["x"], durum["y"]], "yon": durum["yon"],
+            "batarya": durum["batarya"], "yuk": durum["yuk"],
+            "teslim": durum["teslim"], "carpisma": durum["carpisma"],
+            "toplam_adim": durum["adim"], "batarya_bitti": durum["bitti"],
+            "en_cok_ziyaret": [x, y]}
 
 
 if __name__ == "__main__":
