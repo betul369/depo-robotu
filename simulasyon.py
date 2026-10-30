@@ -1,6 +1,8 @@
 #Depo Robotu Simulatoru - kurallar ve dosya islemleri.
 import json
 YONLER = ["K", "D", "G", "B"]
+ADIM = {"K": (0, -1), "D": (1, 0), "G": (0, 1), "B": (-1, 0)}
+
 
 def harita_oku(dosya_yolu):
     with open(dosya_yolu, encoding="utf-8") as f:
@@ -113,7 +115,35 @@ def komut_uygula(durum, komut):
             i = (i - 1) % 4
         durum["yon"] = YONLER[i]
         return "DONUS"
-
+    if ad == "ILERI":
+        dx, dy = ADIM[durum["yon"]]
+        izgara = durum["izgara"]
+        for _ in range(n):
+            nx = durum["x"] + dx
+            ny = durum["y"] + dy
+            disarda = ny < 0 or ny >= len(izgara) or nx < 0 or nx >= len(izgara[0])
+            if disarda or izgara[ny][nx] == "#":
+                durum["carpisma"] += 1
+                ceza = ayar["carpisma_cezasi"]
+                if ceza > durum["batarya"]:
+                    durum["batarya"] = 0
+                    durum["bitti"] = True
+                    return "BATARYA_BITTI"
+                durum["batarya"] -= ceza
+                return "CARPISMA"
+            maliyet = ayar["adim_maliyeti"]
+            if durum["yuk"]:
+                maliyet *= ayar["yuk_carpani"]
+            if maliyet > durum["batarya"]:
+                durum["bitti"] = True
+                return "BATARYA_BITTI"
+            durum["batarya"] -= maliyet
+            durum["x"] = nx
+            durum["y"] = ny
+            durum["adim"] += 1
+            k = (nx, ny)
+            durum["ziyaret"][k] = durum["ziyaret"].get(k, 0) + 1
+        return "HAREKET"
     return "GECERSIZ"
 
 
@@ -121,8 +151,12 @@ def komut_uygula(durum, komut):
 
 
 if __name__ == "__main__":
-    a = ayarlari_oku("paket_ornek/test03/ayarlar.json")
-    iz, r = harita_oku("paket_ornek/test03/harita.txt")
+    p = "paket_ornek/test02/"
+    a = ayarlari_oku(p + "ayarlar.json")
+    iz, r = harita_oku(p + "harita.txt")
+    k, h = komutlari_oku(p + "komutlar.txt")
     d = yeni_durum(iz, r, a)
-    for _ in range(4):
-        print(komut_uygula(d, ("SAG", None)), d["yon"], d["batarya"])
+    for c in k:
+        print(c, komut_uygula(d, c), (d["x"], d["y"]), d["yon"], d["batarya"])
+
+    
