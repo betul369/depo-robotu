@@ -1,5 +1,7 @@
 #Depo Robotu Simulatoru - kurallar ve dosya islemleri.
 import json
+YONLER = ["K", "D", "G", "B"]
+
 def harita_oku(dosya_yolu):
     with open(dosya_yolu, encoding="utf-8") as f:
         satirlar = f.readlines()
@@ -91,6 +93,29 @@ def yeni_durum(izgara, baslangic, ayarlar):
     }
 
 
+def komut_uygula(durum, komut):
+    ad, n = komut
+    ayar = durum["ayarlar"]
+
+    if durum["bitti"]:
+        return "DURDU"
+
+    if ad == "SAG" or ad == "SOL":
+        maliyet = ayar["donus_maliyeti"]
+        if maliyet > durum["batarya"]:
+            durum["bitti"] = True
+            return "BATARYA_BITTI"
+        durum["batarya"] -= maliyet
+        i = YONLER.index(durum["yon"])
+        if ad == "SAG":
+            i = (i + 1) % 4
+        else:
+            i = (i - 1) % 4
+        durum["yon"] = YONLER[i]
+        return "DONUS"
+
+    return "GECERSIZ"
+
 
 
 
@@ -99,4 +124,5 @@ if __name__ == "__main__":
     a = ayarlari_oku("paket_ornek/test03/ayarlar.json")
     iz, r = harita_oku("paket_ornek/test03/harita.txt")
     d = yeni_durum(iz, r, a)
-    print(d["x"], d["y"], d["yon"], d["batarya"])
+    for _ in range(4):
+        print(komut_uygula(d, ("SAG", None)), d["yon"], d["batarya"])
