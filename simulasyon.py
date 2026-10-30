@@ -73,7 +73,30 @@ def ayarlari_oku(dosya_yolu):
     return ayarlar
    
 
+def yeni_durum(izgara, baslangic, ayarlar):
+    x, y = baslangic
+    return {
+        "izgara": [satir[:] for satir in izgara],
+        "x": x,
+        "y": y,
+        "yon": ayarlar["baslangic_yonu"],
+        "batarya": ayarlar["batarya_kapasitesi"],
+        "yuk": False,
+        "teslim": 0,
+        "carpisma": 0,
+        "adim": 0,
+        "bitti": False,
+        "ziyaret": {(x, y): 1},
+        "ayarlar": ayarlar,
+    }
+
+
+
+
+
+
 if __name__ == "__main__":
-    print(ayarlari_oku("paket_ornek/test05/ayarlar.json"))
-    iz, r = harita_oku("paket_ornek/test06/harita.txt")
-    print(r)
+    a = ayarlari_oku("paket_ornek/test03/ayarlar.json")
+    iz, r = harita_oku("paket_ornek/test03/harita.txt")
+    d = yeni_durum(iz, r, a)
+    print(d["x"], d["y"], d["yon"], d["batarya"])
