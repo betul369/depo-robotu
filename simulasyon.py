@@ -202,13 +202,15 @@ def sonuc_olustur(durum):
             "en_cok_ziyaret": [x, y]}
 
 
-if __name__ == "__main__":
-    p = "paket_ornek/test03/"
-    a = ayarlari_oku(p + "ayarlar.json")
-    iz, r = harita_oku(p + "harita.txt")
-    k, h = komutlari_oku(p + "komutlar.txt")
-    d = yeni_durum(iz, r, a)
-    for c in k:
-        print(c, komut_uygula(d, c), (d["x"], d["y"]), d["yon"], d["batarya"])
+def simulasyonu_calistir(izgara, baslangic, komutlar, ayarlar):
+    durum = yeni_durum(izgara, baslangic, ayarlar)
+    log = []
+    for no, komut in enumerate(komutlar, start=1):
+        if durum["bitti"]:
+            break
+        olay = komut_uygula(durum, komut)
+        log.append(log_satiri(no, komut, durum, olay))
+    return sonuc_olustur(durum), log
+
 
     
