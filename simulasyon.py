@@ -213,4 +213,41 @@ def simulasyonu_calistir(izgara, baslangic, komutlar, ayarlar):
     return sonuc_olustur(durum), log
 
 
-    
+def sonuc_yaz(sonuc, dosya_yolu):
+    with open(dosya_yolu, "w", encoding="utf-8") as f:
+        json.dump(sonuc, f, ensure_ascii=False, indent=2)   
+
+
+def log_yaz(log, dosya_yolu):
+    alanlar = ["adim", "komut", "x", "y", "yon", "batarya", "olay"]
+    with open(dosya_yolu, "w", encoding="utf-8", newline="") as f:
+        yazici = csv.DictWriter(f, fieldnames=alanlar)
+        yazici.writeheader()
+        yazici.writerows(log)
+
+
+OKLAR = {"K": "^", "D": ">", "G": "v", "B": "<"}
+def harita_metni(durum):
+    satirlar = []
+    for y, satir in enumerate(durum["izgara"]):
+        metin = ""
+        for x, hucre in enumerate(satir):
+            if x == durum["x"] and y == durum["y"]:
+                metin += OKLAR[durum["yon"]]
+            else:
+                metin += hucre
+        satirlar.append(metin)
+    return "\n".join(satirlar)
+
+
+
+if __name__ == "__main__":
+    p = "deneme_verileri/veri_1/"
+    iz, r = harita_oku(p + "harita.txt")
+    a = ayarlari_oku(p + "ayarlar.json")
+    k, h = komutlari_oku(p + "komutlar.txt")
+    sonuc, log = simulasyonu_calistir(iz, r, k, a)
+    sonuc["hatali_satirlar"] = h
+    sonuc_yaz(sonuc, "sonuc.json")
+    log_yaz(log, "log.csv")
+    print(harita_metni(yeni_durum(iz, r, a)))
