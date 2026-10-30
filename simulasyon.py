@@ -115,6 +115,7 @@ def komut_uygula(durum, komut):
             i = (i - 1) % 4
         durum["yon"] = YONLER[i]
         return "DONUS"
+    
     if ad == "ILERI":
         dx, dy = ADIM[durum["yon"]]
         izgara = durum["izgara"]
@@ -144,6 +145,34 @@ def komut_uygula(durum, komut):
             k = (nx, ny)
             durum["ziyaret"][k] = durum["ziyaret"].get(k, 0) + 1
         return "HAREKET"
+    
+    if ad == "AL":
+        if durum["izgara"][durum["y"]][durum["x"]] == "K" and not durum["yuk"]:
+            durum["izgara"][durum["y"]][durum["x"]] = "."
+            durum["yuk"] = True
+            return "ALINDI"
+        return "GECERSIZ"
+
+    if ad == "BIRAK":
+        if not durum["yuk"]:
+            return "GECERSIZ"
+        hucre = durum["izgara"][durum["y"]][durum["x"]]
+        if hucre == "T":
+            durum["yuk"] = False
+            durum["teslim"] += 1
+            return "TESLIM"
+        if hucre == ".":
+            durum["izgara"][durum["y"]][durum["x"]] = "K"
+            durum["yuk"] = False
+            return "BIRAKILDI"
+        return "GECERSIZ"
+
+    if ad == "SARJ":
+        if durum["izgara"][durum["y"]][durum["x"]] == "S":
+            durum["batarya"] = ayar["batarya_kapasitesi"]
+            return "SARJ"
+        return "GECERSIZ"
+    
     return "GECERSIZ"
 
 
@@ -151,7 +180,7 @@ def komut_uygula(durum, komut):
 
 
 if __name__ == "__main__":
-    p = "paket_ornek/test02/"
+    p = "paket_ornek/test03/"
     a = ayarlari_oku(p + "ayarlar.json")
     iz, r = harita_oku(p + "harita.txt")
     k, h = komutlari_oku(p + "komutlar.txt")
