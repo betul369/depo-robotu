@@ -1,30 +1,36 @@
 #Depo Robotu Simulatoru - kurallar ve dosya islemleri.
-
+import json
 def harita_oku(dosya_yolu):
     with open(dosya_yolu, encoding="utf-8") as f:
         satirlar = f.readlines()
-        temiz = []
+        
+    temiz = []
     for s in satirlar:
         temiz.append(s.rstrip("\r\n"))
-        if len(temiz) == 0:
-          raise ValueError("Harita bos")
-        genislik = len(temiz[0])
-        for satir in temiz:
-            if len(satir) != genislik:
-               raise ValueError("Satir uzunluklari farkli")
-            baslangiclar = []
-            for y, satir in enumerate(temiz):
-                for x, hucre in enumerate(satir):
-                    if hucre == "R":
-                        baslangiclar.append((x, y))
-            if len(baslangiclar) != 1:
-                raise ValueError("Haritada tam olarak 1 robot (R) olmali")
+        
+    if len(temiz) == 0:
+        raise ValueError("Harita bos")
+        
+    genislik = len(temiz[0])
+    for satir in temiz:
+        if len(satir) != genislik:
+            raise ValueError("Satir uzunluklari farkli")
+            
+    baslangiclar = []
+    for y, satir in enumerate(temiz):
+        for x, hucre in enumerate(satir):
+            if hucre == "R":
+                baslangiclar.append((x, y))
+            
+    if len(baslangiclar) != 1:
+        raise ValueError("Haritada tam olarak 1 robot (R) olmali")
                    
     izgara = []
     for satir in temiz:
         izgara.append(list(satir.replace("R", ".")))
     return izgara, baslangiclar[0]        
     
+
 def komutlari_oku(dosya_yolu):
     komutlar = []
     hatalar = []
@@ -54,13 +60,20 @@ def komutlari_oku(dosya_yolu):
                 hatalar.append({"satir": no, "icerik": satir,
                                 "neden": "bilinmeyen komut"})
     return komutlar, hatalar    
-    
+
+
+def ayarlari_oku(dosya_yolu):
+    with open(dosya_yolu, encoding="utf-8") as f:
+        ayarlar = json.load(f)
+        gerekli = ["batarya_kapasitesi", "baslangic_yonu", "adim_maliyeti",
+                   "yuk_carpani", "donus_maliyeti", "carpisma_cezasi"]
+        for anahtar in gerekli:
+            if anahtar not in ayarlar:
+                raise ValueError("ayarlar.json'da eksik anahtar: " + anahtar)
+    return ayarlar
    
 
 if __name__ == "__main__":
-    #k, h = komutlari_oku("paket_ornek/test05/komutlar.txt")
-        k, h = komutlari_oku("deneme_verileri/veri_1/komutlar.txt")
-print([(x["satir"], x["icerik"]) for x in h])
-#print(k)
-#print([x["satir"] for x in h])
-
+    print(ayarlari_oku("paket_ornek/test05/ayarlar.json"))
+    iz, r = harita_oku("paket_ornek/test06/harita.txt")
+    print(r)
